@@ -10,21 +10,25 @@ mod flipper {
     }
 
     impl Flipper {
+        /// Initiate the contract state with provided value.
         #[ink(constructor)]
         pub fn new(init_value: bool) -> Self {
             Self { value: init_value }
         }
 
+        /// Initiate the contract state with value equals flase.
         #[ink(constructor)]
         pub fn default() -> Self {
             Self::new(Default::default())
         }
 
+        /// Returns the current value
         #[ink(message)]
         pub fn get(&self) -> bool {
             self.value
         }
 
+        /// Flip the current value.
         #[ink(message)]
         pub fn flip(&mut self) {
             self.value = !self.value;
