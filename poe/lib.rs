@@ -48,6 +48,17 @@ mod poe {
         owner: AccountId,
     }
 
+    /// Event emitted when a proof is transferred to a new account
+    #[ink(event)]
+    pub struct ClaimTransferred {
+        #[ink(topic)]
+        claim: Hash,
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        to: AccountId,
+    }
+
     impl Poe {
         /// Initate a new contract.
         #[ink(constructor)]
@@ -92,6 +103,26 @@ mod poe {
                 owner,
             });
             
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn transfer_claim(&mut self, claim: Hash, to: AccountId) -> Result<()> {
+            let owner = self.proofs.get(&claim).ok_or(Error::ClaimNotExist)?;
+
+            let caller = self.env().caller();
+            if caller != owner {
+                return Err(Error::NotClaimOwner)
+            }
+
+            self.proofs.insert(&claim, &to);
+
+            self.env().emit_event(ClaimTransferred {
+                claim,
+                owner,
+                to,
+            });
+
             Ok(())
         }
 
@@ -146,6 +177,26 @@ mod poe {
 
             set_next_caller(default_accounts.alice);
             assert_eq!(contract.revoke_claim(claim), Ok(()));
+        }
+
+        #[ink::test]
+        fn transfer_claim_works() {
+            let default_accounts = default_accounts();
+            let claim = Hash::from([0x99; 32]);
+
+            set_next_caller(default_accounts.alice);
+            let mut contract = Poe::new();
+
+            assert_eq!(contract.transfer_claim(claim, default_accounts.bob), Err(Error::ClaimNotExist));
+            assert_eq!(contract.create_claim(claim), Ok(()));
+
+            set_next_caller(default_accounts.bob);
+            assert_eq!(contract.transfer_claim(claim, default_accounts.charlie), Err(Error::NotClaimOwner));
+
+            set_next_caller(default_accounts.alice);
+            assert_eq!(contract.transfer_claim(claim, default_accounts.charlie), Ok(()));
+
+            assert_eq!(contract.get_owner(claim), Some(default_accounts.charlie));
         }
 
     }
