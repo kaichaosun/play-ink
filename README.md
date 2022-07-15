@@ -2,6 +2,7 @@
 
 Contracts includes,
 - flipper
+- proof of existence
 
 
 ## Installation

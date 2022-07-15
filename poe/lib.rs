@@ -87,6 +87,7 @@ mod poe {
             Ok(())
         }
 
+        /// Revoke a proof if the sender is the owner of the claim.
         #[ink(message)]
         pub fn revoke_claim(&mut self, claim: Hash) -> Result<()> {
             let owner = self.proofs.get(&claim).ok_or(Error::ClaimNotExist)?;
@@ -106,6 +107,7 @@ mod poe {
             Ok(())
         }
 
+        /// Transfer an existing proof to a new owner.
         #[ink(message)]
         pub fn transfer_claim(&mut self, claim: Hash, to: AccountId) -> Result<()> {
             let owner = self.proofs.get(&claim).ok_or(Error::ClaimNotExist)?;
