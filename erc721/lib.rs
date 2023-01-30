@@ -29,6 +29,8 @@ mod erc721 {
         TokenNotFound,
         NotApproved,
         CannotFetchValue,
+        NotOwner,
+        CannotInsert,
     }
 
     /// Event emitted when a token transfer occurs.
@@ -38,6 +40,16 @@ mod erc721 {
         from: Option<AccountId>,
         #[ink(topic)]
         to: Option<AccountId>,
+        #[ink(topic)]
+        id: TokenId,
+    }
+
+    #[ink(event)]
+    pub struct Approval {
+        #[ink(topic)]
+        from: AccountId,
+        #[ink(topic)]
+        to: AccountId,
         #[ink(topic)]
         id: TokenId,
     }
@@ -88,6 +100,46 @@ mod erc721 {
             Ok(())
         }
 
+        /// Transfer approved or owned token.
+        #[ink(message)]
+        pub fn transfer_from(
+            &mut self,
+            from: AccountId,
+            to: AccountId,
+            id: TokenId,
+        ) -> Result<(), Error> {
+            self.transfer_token_from(&from, &to, id)?;
+
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn burn(&mut self, id: TokenId) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let Self {
+                token_owner,
+                owned_tokens_count,
+                ..
+            } = self;
+
+            let owner = token_owner.get(id).ok_or(Error::TokenNotFound)?;
+            if owner != caller {
+                return Err(Error::NotOwner)
+            }
+
+            let count = owned_tokens_count.get(caller).map(|c| c - 1).ok_or(Error::CannotFetchValue)?;
+            owned_tokens_count.insert(caller, &count);
+            token_owner.remove(id);
+
+            self.env().emit_event(Transfer {
+                from: Some(caller),
+                to: Some(AccountId::from([0x0; 32])),
+                id,
+            });
+
+            Ok(())
+        }
+
         /// Returns the balance of the owner.
         ///
         /// This represents the amount of unique tokens the owner has.
@@ -100,6 +152,13 @@ mod erc721 {
         #[ink(message)]
         pub fn owner_of(&self, id: TokenId) -> Option<AccountId> {
             self.token_owner.get(id)
+        }
+
+        #[ink(message)]
+        pub fn approve(&mut self, to: AccountId, id: TokenId) -> Result<(), Error> {
+            self.approve_for(&to, id)?;
+
+            Ok(())
         }
 
         /// Returns the approved account ID for this token if any.
@@ -217,6 +276,34 @@ mod erc721 {
 
         fn approved_for_all(&self, owner: AccountId, operator: AccountId) -> bool {
             self.operator_approvals.contains((&owner, &operator))
+        }
+
+        fn approve_for(&mut self, to: &AccountId, id: TokenId) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let owner = self.owner_of(id);
+            if !(owner == Some(caller)
+                || self.approved_for_all(owner.expect("Error with AccountId"), caller))
+            {
+                return Err(Error::NotAllowed)
+            }
+
+            if *to == AccountId::from([0x0; 32]) {
+                return Err(Error::NotAllowed)
+            }
+
+            if self.token_approvals.contains(id) {
+                return Err(Error::CannotInsert)
+            }
+
+            self.token_approvals.insert(id, to);
+
+            self.env().emit_event(Approval {
+                from: caller,
+                to: *to,
+                id,
+            });
+
+            Ok(())
         }
 
         fn approve_for_all(
