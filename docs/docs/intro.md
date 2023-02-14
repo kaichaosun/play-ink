@@ -2,46 +2,30 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Course Intro
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Let's play with **ink** together.
 
-## Getting Started
+## Smart Contract Intro
 
-Get started by **creating a new site**.
+There are a few options to build decentralized application,
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+- build your own chain
+- build dapps on a public blockchain like Ethereum
+- build dapps with non-blockchain tech, like Hypercore, libp2p, etc.
 
-### What you'll need
+Why you want to build with smart contracts?
 
-- [Node.js](https://nodejs.org/en/download/) version 16.14 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+- maintain a blockchain require heavy investment of capital and human resources
+- blockchain related tech is the **go-to** option to build transactional business
+- non-blockchain tech is still early to use in production.
 
-## Generate a new site
 
-Generate a new Docusaurus site using the **classic template**.
+## Why use ink
 
-The classic template will automatically be added to your project after you run the command:
+If you like Rust, you should feel home to use ink. It shares the same tools of Rust ecoystem.
 
-```bash
-npm init docusaurus@latest my-website classic
-```
+## ink vs Solidity
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+https://use.ink/ink-vs-solidity
 
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
