@@ -1,7 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use ink_lang as ink;
-
 #[ink::contract]
 mod flipper {
     #[ink(storage)]
@@ -38,10 +36,7 @@ mod flipper {
 
 #[cfg(test)]
 mod tests {
-    use crate::flipper::Flipper;
-
-    // use super::*;
-    use ink_lang as ink;
+    use crate::flipper::*;
 
     #[ink::test]
     fn default_works() {
