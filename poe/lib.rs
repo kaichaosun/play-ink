@@ -1,15 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use ink_lang as ink;
-
 #[ink::contract]
 mod poe {
 
-    use ink_storage::{traits::SpreadAllocate, Mapping};
+    use ink::storage::Mapping;
 
     /// Defines the storage of your contract.
     #[ink(storage)]
-    #[derive(Default, SpreadAllocate)]
+    #[derive(Default)]
     pub struct Poe {
         /// Stores the proof which includes hash of content and its owner.
         proofs: Mapping<Hash, AccountId>,
@@ -63,9 +61,11 @@ mod poe {
         /// Initate a new contract.
         #[ink(constructor)]
         pub fn new() -> Self {
-            // This call is required in order to correctly initialize the
-            // `Mapping` of our contract.
-            ink_lang::utils::initialize_contract(|_| {})
+            let proofs = Mapping::default();
+            
+            Self {
+                proofs
+            }
         }
 
         /// Create a proof with claim being the hash of the content,
@@ -138,14 +138,13 @@ mod poe {
     #[cfg(test)]
     mod tests {
         use super::*;
-        use ink_lang as ink;
 
-        fn default_accounts() -> ink_env::test::DefaultAccounts<ink_env::DefaultEnvironment> {
-            ink_env::test::default_accounts::<Environment>()
+        fn default_accounts() -> ink::env::test::DefaultAccounts<ink::env::DefaultEnvironment> {
+            ink::env::test::default_accounts::<Environment>()
         }
 
         fn set_next_caller(caller: AccountId) {
-            ink_env::test::set_caller::<Environment>(caller);
+            ink::env::test::set_caller::<Environment>(caller);
         }
 
         #[ink::test]
